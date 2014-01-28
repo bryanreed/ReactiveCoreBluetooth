@@ -280,4 +280,9 @@
     }
 }
 
+- (NSArray*)retrievePeripheralsWithIdentifiers:(NSArray *)identifiers
+{
+    return [self.cbManager retrievePeripheralsWithIdentifiers:identifiers];
+}
+
 @end
