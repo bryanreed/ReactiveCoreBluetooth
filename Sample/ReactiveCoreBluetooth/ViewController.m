@@ -27,7 +27,7 @@
     
     self.bluetoothService = [[BluetoothLEService alloc] init];
 
-    [RACObserve(self, blueToothDevices) subscribeNext:^(id x) {
+    [RACAble(self, blueToothDevices) subscribeNext:^(id x) {
         [self.tableView reloadData];
     }];
     
@@ -35,7 +35,7 @@
         self.blueToothDevices = x;
     }];
     
-    [RACObserve(self, blueToothStatus) subscribeNext:^(id x) {
+    [RACAble(self, blueToothStatus) subscribeNext:^(id x) {
         [self.tableView reloadData];
     }];
 
