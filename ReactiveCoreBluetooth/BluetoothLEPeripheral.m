@@ -34,6 +34,7 @@
     _discoveredCharacteristicsSignal    = [RACSubject subject];
     _wroteValueSignal                   = [RACSubject subject];
     _updatedValueSignal                 = [RACSubject subject];
+    _changedNotificationStatusSignal    = [RACSubject subject];
 }
 
 #pragma mark - CBperipheral delegate
@@ -67,6 +68,14 @@
         [_updatedValueSignal sendError:error];
     } else {
         [_updatedValueSignal sendNext:characteristic];
+    }
+}
+
+- (void)peripheral:(CBPeripheral *)peripheral didUpdateNotificationStateForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error {
+    if (error) {
+        [_changedNotificationStatusSignal sendError:error];
+    } else {
+        [_changedNotificationStatusSignal sendNext:characteristic];
     }
 }
 
