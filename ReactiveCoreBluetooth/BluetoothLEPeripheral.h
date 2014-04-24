@@ -17,6 +17,7 @@
 @property (nonatomic, strong) RACSubject* discoveredCharacteristicsSignal;
 @property (nonatomic, strong) RACSubject* wroteValueSignal;
 @property (nonatomic, strong) RACSubject* updatedValueSignal;
+@property (nonatomic, strong) RACSubject* changedNotificationStatusSignal;
 
 @property (nonatomic, strong) CBPeripheral* device;
 
