@@ -77,7 +77,18 @@
 }
 
 -(void) connectDevice:(CBPeripheral *)device {
-    [self.cbManager connectPeripheral:device options:nil];
+    if(self.cbManager.state == CBCentralManagerStatePoweredOn)
+    {
+        [self.cbManager connectPeripheral:device options:nil];
+    }
+    else
+    {
+        [[[self bluetoothStateSignal] filter:^BOOL(NSNumber *stateNumber) {
+            return stateNumber.intValue == CBCentralManagerStatePoweredOn;
+        }] subscribeNext:^(id x) {
+            [self.cbManager connectPeripheral:device options:nil];
+        }];
+    }
 }
 
 -(void) disconnectDevice:(CBPeripheral *)device {
