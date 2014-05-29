@@ -154,22 +154,21 @@
         }
 
         devicesToKeep = [[NSMutableArray alloc] init];
-        BOOL devicesDisconnected = NO;
+        BOOL devicesChanged = NO;
         
         for (CacheObject* obj in self.availableDevices)
         {
-            CBPeripheral* p = (CBPeripheral*)obj.object;
-            if (p.isConnected)
+            if (!obj.isExpired)
             {
                 [devicesToKeep addObject:obj];
             }
             else
             {
-                devicesDisconnected = YES;
+                devicesChanged = YES;
             }
         }
         
-        if (devicesDisconnected)
+        if (devicesChanged)
         {
             self.availableDevices = devicesToKeep;
             [_availableDevicesSignal sendNext:[self devices]];
@@ -245,6 +244,10 @@
                 [self.availableDevices addObject:obj];
                 [_availableDevicesSignal sendNext:[self devices]];
             }
+        }
+        else
+        {
+            [availablePeripheral refreshExpiration:self.cacheDurationForDevices];
         }
     }
 }

@@ -36,4 +36,9 @@
     }
 }
 
+-(void) refreshExpiration:(NSTimeInterval)lifespan
+{
+    self.expirationDate = [NSDate dateWithTimeIntervalSinceNow:lifespan];
+}
+
 @end

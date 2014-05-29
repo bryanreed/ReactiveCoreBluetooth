@@ -15,6 +15,8 @@
 
 -(id) initWithObject:(id) obj andLifespan:(NSTimeInterval)lifespan;
 
+-(void) refreshExpiration:(NSTimeInterval)lifespan;
+
 -(BOOL)isExpired;
 
 @end
