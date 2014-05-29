@@ -8,6 +8,7 @@
 
 #import "BluetoothLEService.h"
 #import "CacheObject.h"
+#import <libextobjc/EXTScope.h>
 
 @interface BluetoothLEService()
 {
@@ -70,28 +71,49 @@
 
 -(void) scanForAvailableDevicesWithServices:(NSArray *)serviceUUIDs
 {
-    [_scanningForDevicesSignal sendNext:@(YES)];
-    NSDictionary *options = @{CBCentralManagerScanOptionAllowDuplicatesKey:@(YES)};
-    [self.cbManager scanForPeripheralsWithServices:serviceUUIDs
-                                           options:options];
+    if(self.cbManager.state == CBCentralManagerStatePoweredOn)
+    {
+        [_scanningForDevicesSignal sendNext:@(YES)];
+        NSDictionary *options = @{CBCentralManagerScanOptionAllowDuplicatesKey:@(YES)};
+        [self.cbManager scanForPeripheralsWithServices:serviceUUIDs
+                                               options:options];
+    }
+    else
+    {
+        @weakify(self)
+        
+        [[[self bluetoothStateSignal] filter:^BOOL(NSNumber *stateNumber) {
+            return stateNumber.intValue == CBCentralManagerStatePoweredOn;
+        }] subscribeNext:^(id x) {
+            @strongify(self)
+            [_scanningForDevicesSignal sendNext:@(YES)];
+            NSDictionary *options = @{CBCentralManagerScanOptionAllowDuplicatesKey:@(YES)};
+            [self.cbManager scanForPeripheralsWithServices:serviceUUIDs
+                                                   options:options];
+        }];
+    }
 }
 
--(void) connectDevice:(CBPeripheral *)device {
+-(void) connectDevice:(CBPeripheral *)device
+{
     if(self.cbManager.state == CBCentralManagerStatePoweredOn)
     {
         [self.cbManager connectPeripheral:device options:nil];
     }
     else
     {
+        @weakify(self)
         [[[self bluetoothStateSignal] filter:^BOOL(NSNumber *stateNumber) {
             return stateNumber.intValue == CBCentralManagerStatePoweredOn;
         }] subscribeNext:^(id x) {
+            @strongify(self)
             [self.cbManager connectPeripheral:device options:nil];
         }];
     }
 }
 
--(void) disconnectDevice:(CBPeripheral *)device {
+-(void) disconnectDevice:(CBPeripheral *)device
+{
     [self.cbManager cancelPeripheralConnection:device];
 }
 
@@ -107,7 +129,10 @@
     _peripheralDisconnectedSignal = [RACSubject subject];
     self.expireKnownDevicesSignal = [[RACSignal interval:self.cachePollingInterval] deliverOn:[RACScheduler mainThreadScheduler]];
     
+    @weakify(self)
     [self.expireKnownDevicesSignal subscribeNext:^(id x) {
+        @strongify(self)
+        
         NSMutableArray *devicesToKeep = [[NSMutableArray alloc] init];
         BOOL devicesExpired = NO;
         
